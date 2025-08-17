@@ -1,36 +1,19 @@
-#include <bits/stdc++.h>
-using namespace std;
+#include <iostream>
+#include <vector>
+#include <iomanip>
+#include <cstdlib>
+#include <ctime>
 
 class Game2048 {
 private:
-    vector<vector<int>> board;
+    std::vector<std::vector<int>> board;
     int size;
     bool gameOver;
-
-public:
-    Game2048(int s) : size(s), gameOver(false) {
-        board.resize(size, vector<int>(size, 0));
-        srand(time(0));
-        addNewTile();
-        addNewTile();
-    }
-
-    void displayBoard() {
-        for (const auto& row : board) {
-            for (int tile : row) {
-                if (tile == 0) {
-                    cout << setw(4) << ".";
-                } else {
-                    cout << setw(4) << tile;
-                }
-            }
-            cout << endl;
-        }
-        cout << endl;
-    }
+    bool gameWon;
+    int score;
 
     void addNewTile() {
-        vector<pair<int, int>> emptyTiles;
+        std::vector<std::pair<int, int>> emptyTiles;
         for (int i = 0; i < size; ++i) {
             for (int j = 0; j < size; ++j) {
                 if (board[i][j] == 0) {
@@ -39,8 +22,8 @@ public:
             }
         }
         if (!emptyTiles.empty()) {
-            int randIndex = rand() % emptyTiles.size();
-            board[emptyTiles[randIndex].first][emptyTiles[randIndex].second] = (rand() % 2 + 1) * 2;
+            int randIndex = std::rand() % emptyTiles.size();
+            board[emptyTiles[randIndex].first][emptyTiles[randIndex].second] = (std::rand() % 2 + 1) * 2;
         }
     }
 
@@ -55,20 +38,33 @@ public:
         return false;
     }
 
+    void checkWin() {
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
+                if (board[i][j] == 2048) {
+                    gameWon = true;
+                    return;
+                }
+            }
+        }
+    }
+
     void moveLeft() {
         for (int i = 0; i < size; ++i) {
-            vector<int> newRow(size, 0);
-            int k = 0;
+            std::vector<int> newRow;
             for (int j = 0; j < size; ++j) {
                 if (board[i][j] != 0) {
-                    if (k > 0 && newRow[k - 1] == board[i][j]) {
-                        newRow[k - 1] *= 2;
-                        newRow[k] = 0;
+                    if (!newRow.empty() && newRow.back() == board[i][j]) {
+                        newRow.back() *= 2;
+                        score += newRow.back();
+                        newRow.push_back(0);
                     } else {
-                        newRow[k] = board[i][j];
-                        ++k;
+                        newRow.push_back(board[i][j]);
                     }
                 }
+            }
+            while (newRow.size() < size) {
+                newRow.push_back(0);
             }
             board[i] = newRow;
         }
@@ -76,18 +72,21 @@ public:
 
     void moveRight() {
         for (int i = 0; i < size; ++i) {
-            vector<int> newRow(size, 0);
-            int k = size - 1;
+            std::vector<int> newRow;
             for (int j = size - 1; j >= 0; --j) {
                 if (board[i][j] != 0) {
-                    if (k < size - 1 && newRow[k + 1] == board[i][j]) {
-                        newRow[k + 1] *= 2;
-                        newRow[k] = 0;
+                    if (!newRow.empty() && newRow.back() == board[i][j]) {
+                        newRow.back() *= 2;
+                        score += newRow.back();
+                        newRow.push_back(0);
                     } else {
-                        newRow[k] = board[i][j];
-                        --k;
+                        newRow.push_back(board[i][j]);
                     }
                 }
+            }
+            std::reverse(newRow.begin(), newRow.end());
+            while (newRow.size() < size) {
+                newRow.insert(newRow.begin(), 0);
             }
             board[i] = newRow;
         }
@@ -95,18 +94,20 @@ public:
 
     void moveUp() {
         for (int j = 0; j < size; ++j) {
-            vector<int> newCol(size, 0);
-            int k = 0;
+            std::vector<int> newCol;
             for (int i = 0; i < size; ++i) {
                 if (board[i][j] != 0) {
-                    if (k > 0 && newCol[k - 1] == board[i][j]) {
-                        newCol[k - 1] *= 2;
-                        newCol[k] = 0;
+                    if (!newCol.empty() && newCol.back() == board[i][j]) {
+                        newCol.back() *= 2;
+                        score += newCol.back();
+                        newCol.push_back(0);
                     } else {
-                        newCol[k] = board[i][j];
-                        ++k;
+                        newCol.push_back(board[i][j]);
                     }
                 }
+            }
+            while (newCol.size() < size) {
+                newCol.push_back(0);
             }
             for (int i = 0; i < size; ++i) {
                 board[i][j] = newCol[i];
@@ -116,18 +117,21 @@ public:
 
     void moveDown() {
         for (int j = 0; j < size; ++j) {
-            vector<int> newCol(size, 0);
-            int k = size - 1;
+            std::vector<int> newCol;
             for (int i = size - 1; i >= 0; --i) {
                 if (board[i][j] != 0) {
-                    if (k < size - 1 && newCol[k + 1] == board[i][j]) {
-                        newCol[k + 1] *= 2;
-                        newCol[k] = 0;
+                    if (!newCol.empty() && newCol.back() == board[i][j]) {
+                        newCol.back() *= 2;
+                        score += newCol.back();
+                        newCol.push_back(0);
                     } else {
-                        newCol[k] = board[i][j];
-                        --k;
+                        newCol.push_back(board[i][j]);
                     }
                 }
+            }
+            std::reverse(newCol.begin(), newCol.end());
+            while (newCol.size() < size) {
+                newCol.insert(newCol.begin(), 0);
             }
             for (int i = 0; i < size; ++i) {
                 board[i][j] = newCol[i];
@@ -135,7 +139,32 @@ public:
         }
     }
 
+public:
+    Game2048(int s) : size(s), gameOver(false), gameWon(false), score(0) {
+        board.resize(size, std::vector<int>(size, 0));
+        std::srand(std::time(0));
+        addNewTile();
+        addNewTile();
+    }
+
+    void displayBoard() {
+        std::cout << "Score: " << score << std::endl;
+        for (const auto& row : board) {
+            for (int tile : row) {
+                if (tile == 0) {
+                    std::cout << std::setw(4) << ".";
+                } else {
+                    std::cout << std::setw(4) << tile;
+                }
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
     void move(char direction) {
+        std::vector<std::vector<int>> prevBoard = board;
+        
         switch (direction) {
             case 'a':
                 moveLeft();
@@ -150,13 +179,21 @@ public:
                 moveDown();
                 break;
             default:
-                cout << "Invalid move! Use w/a/s/d keys." << endl;
+                std::cout << "Invalid move! Use w/a/s/d keys." << std::endl;
                 return;
         }
-        addNewTile();
-        if (!canMove()) {
+
+        if (prevBoard != board) {
+            addNewTile();
+        }
+
+        checkWin();
+        if (gameWon) {
+            std::cout << "Congratulations! You won the game!" << std::endl;
             gameOver = true;
-            cout << "Game Over!" << endl;
+        } else if (!canMove()) {
+            gameOver = true;
+            std::cout << "Game Over!" << std::endl;
         }
     }
 
@@ -167,15 +204,23 @@ public:
 
 int main() {
     int boardSize = 4;
-    Game2048 game(boardSize);
+    char playAgain;
 
-    char move;
-    while (!game.isGameOver()) {
+    do {
+        Game2048 game(boardSize);
+        char moveInput;
+        while (!game.isGameOver()) {
+            game.displayBoard();
+            std::cout << "Enter your move (w/a/s/d): ";
+            std::cin >> moveInput;
+            game.move(moveInput);
+        }
         game.displayBoard();
-        cout << "Enter your move (w/a/s/d): ";
-        cin >> move;
-        game.move(move);
-    }
+        std::cout << "Do you want to play again? (y/n): ";
+        std::cin >> playAgain;
+    } while (playAgain == 'y' || playAgain == 'Y');
+
+    std::cout << "Thanks for playing!" << std::endl;
 
     return 0;
 }
